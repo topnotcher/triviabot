@@ -240,22 +240,22 @@ class TriviaBot < Cinch::Bot
 		@question[:answer].each do |a|
 			if normalize_answer(a) == normalize_answer(t)
 				@question[:answer].delete a if @kaos
-				question_answered(m.user.nick)
+				question_answered(m.user.nick,a)
 				return
 			end
 		end
 	end
 
-	def question_answered(nick)
+	def question_answered(nick,answer)
 		add_score nick, 1
 		fire_event :question_answered, nick
 
 		if @kaos
 			remain = @question[:answer].size
-			chanmsg "Good job, %s! %d answers remain." % [nick,remain]
+			chanmsg "Good job, %s (%s)! %d answers remain." % [nick,answer,remain]
 			start_question_in 10 if remain == 0
 		else
-			chanmsg "%s %s wins!" % [Format(:blue,"Correct!"), nick]
+			chanmsg "%s %s wins! '%s' was the answer." % [Format(:blue,"Correct!"), nick, answer]
 			start_question_in 10
 		end
 	end
