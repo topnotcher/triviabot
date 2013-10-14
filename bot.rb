@@ -174,11 +174,16 @@ class TriviaBot < Cinch::Bot
 	end
 	
 	def repeat(m)
+		return unless active_question?
 		send_question
 	end	
 
-	def start_question_in n
+	def end_question
 		@question = nil
+	end
+
+	def start_question_in n
+		end_question
 		@question_start_wait = n
 	end
 
@@ -291,6 +296,7 @@ class TriviaBot < Cinch::Bot
 	def game_timeout 
 		if @timeout_count >= 3
 			chanmsg "Ending game after 3 consecutive timeouts!"
+			end_question
 			@active = false
 			return true
 		else
