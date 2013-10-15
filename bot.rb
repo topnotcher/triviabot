@@ -231,7 +231,7 @@ class TriviaBot < Cinch::Bot
 	end
 
 	def normalize_answer(a)
-		a.strip.downcase
+		a.downcase.gsub(/[^0-9a-z& ]/,'').sub('&','and').gsub(/[ ]+/, ' ').strip
 	end
 
 	def check_answer(m,t)
