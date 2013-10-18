@@ -230,15 +230,48 @@ class TriviaBot < Cinch::Bot
 		chanmsg Format(:green, ">>> %s" % [@question[:question]])
 	end
 
+	# answer must have been normalized.
+	def strip_leading_articles! a
+		a.gsub!(/^(a|an|the) (.+)/,'\2')
+	end
+
+	def strip_trailing_plural! a
+		a.gsub!(/([a-z]{4,})s$/,'\1')
+	end
+
 	def normalize_answer(a)
-		a.downcase.gsub(/[^0-9a-z& ]/,'').sub('&','and').gsub(/[ ]+/, ' ').strip
+		norm = a.downcase
+
+		# hyphens become spaces when surrounded by letters
+		norm.gsub!(/([a-z])-([a-z])/, '\1 \2')
+
+		norm.sub!(' & ', ' and ')
+
+		norm.gsub!(/[^0-9a-z \-]/,'')
+	
+		# after removing symbols - it could have been rock 'n roll, but 
+		# we'd also like to match rock and roll, but if it were written rockn roll? nah
+		norm.sub!(' n ', ' and ')
+
+		norm.gsub!(/[ ]+/, ' ')
+	
+		norm.strip!
+
+		# so this is debatable, but...
+		strip_leading_articles! norm
+		strip_trailing_plural! norm
+		return norm
+	end
+
+	def answers_match? a1,a2
+		normalize_answer(a1) == normalize_answer(a2)
 	end
 
 	def check_answer(m,t)
 		return unless active_question?
 		@timeout_count = 0
 		@question[:answer].each do |a|
-			if normalize_answer(a) == normalize_answer(t)
+			if answers_match?(t,a)
 				@question[:answer].delete a if @kaos
 				question_answered(m.user.nick,a)
 				return
