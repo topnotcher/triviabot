@@ -58,22 +58,44 @@ class TriviaStreak
 		@nick ||= nick
 		
 		if @nick.downcase != nick.downcase
+	
+			if @streak and @streak >= 5
+				@bot.chanmsg "%s broke %s's %d-answer streak!" % [nick, @nick, @streak]
+			end
+
 			@nick = nick
 			@streak = 0
 		end
 
 		@streak += 1
 
-		if @streak == 2
+		if @streak == 2 and rand(1) == 1
 			@bot.chanact "hands %s beer!" % [nick]
 		elsif @streak == 3
-			@bot.chanmsg "%s is on fire: %d answer streak!" % [nick, @streak]
+			msg = [ 
+				"%s is on "+Format(:red,"FIRE!") ,
+				"%s is on a ROLL.",
+				"Congratulations, %s! That's your 3rd correct answer in a row.",
+				"Great job, %s! Keep up the good work."
+			].sample
+
+			@bot.chanmsg msg % [nick]
 		elsif @streak == 5
-			@bot.chanmsg "%d answers in a row!?!? %s is UNSTOPPABLE!" % [@streak, nick]
+			@bot.chanmsg "%s is UNSTOPPABLE! (5)" % [nick]
+		elsif @streak == 8
+			@bot.chanmsg "Uhh... is anyone else playing, or is it just %s?!? (8)" % [nick]
+		elsif @streak == 10
+			@bot.chanmsg "%s is the TRIVIA MASTER. (10) " % [nick]
+		elsif @streak > 10
+			@bot.chanmsg "%s's streak continues: %d answers in a row!" % [nick, @streak]
 		end
 	end
 
 	def question_timeout
+		if @streak and @streak >= 5
+			@bot.chanmsg "%s's reign of terror has ended!" % [@nick]
+		end
+	
 		@nick = nil
 		@streak = nil
 	end
