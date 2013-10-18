@@ -293,6 +293,10 @@ class TriviaBot < Cinch::Bot
 		end
 	end
 
+	def stop_game
+		@active = false
+	end
+
 	def game_timeout 
 		if @timeout_count >= 3
 			chanmsg "Ending game after 3 consecutive timeouts!"
@@ -337,6 +341,10 @@ bot = TriviaBot.new do
 
 	on :channel, /^!start$/ do |m|
 		bot.start_game m
+	end
+
+	on :channel, /^!stfu$/ do |m|
+		bot.stop_game
 	end
 
 	on :channel, /^!repeat$/ do |m|
