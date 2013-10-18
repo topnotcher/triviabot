@@ -31,7 +31,7 @@ class TriviaTaunter
 		return if @bot.active
 		@idle += 1
 
-		taunt if @idle >= 900
+		taunt if @idle >= 3600
 	end
 	
 	def taunt
