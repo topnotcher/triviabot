@@ -172,6 +172,18 @@ class TriviaBot < Cinch::Bot
 		entry[:score] += score
 	end
 
+	def handle_cmd(m, cmd, argstr)
+		if cmd == 'start'
+			start_game m
+		elsif cmd == 'repeat'
+			repeat m
+		elsif cmd == 'stfu'
+			stop_game
+		elsif cmd == 'stats'
+			stats m
+		end
+	end
+
 	def start_game m
 		return if @active
 		
@@ -394,20 +406,8 @@ bot = TriviaBot.new do
 		#derp derp derp
 	end
 
-	on :channel, /^!start$/ do |m|
-		bot.start_game m
-	end
-
-	on :channel, /^!stfu$/ do |m|
-		bot.stop_game
-	end
-
-	on :channel, /^!repeat$/ do |m|
-		bot.repeat m
-	end
-
-	on :channel, /^!stats$/ do |m|
-		bot.stats m
+	on :channel, /^!([A-Za-z0-9_\-]+)(?: (.+))?$/ do |m,cmd,argstr|
+		bot.handle_cmd m, cmd, argstr
 	end
 
 	on :channel, /^([^!].*)$/ do |m,t|
