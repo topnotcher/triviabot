@@ -1,3 +1,4 @@
+require 'yaml'
 require 'cinch'
 
 class TriviaTicker
@@ -49,7 +50,36 @@ end
 class TriviaLeaderboard
 	def initialize(bot)
 		@bot = bot
+	
 		@scores = []
+
+		load_saved_scores
+	end
+
+	def load_saved_scores
+		# epic hard-coded dumbness
+		store_file = 'stats.yaml'
+
+		return unless File.exists? store_file
+		
+		begin 
+			@scores = YAML::load(File.open(store_file).read)
+		# @todo log
+		rescue
+			@scores = []
+		end
+	end
+
+	def save_scores
+		stats_file = 'stats.yaml'
+		begin
+			File.open(stats_file,'w') do |file|
+				file.puts YAML::dump(@scores)
+			end
+		# @todo log
+		rescue
+			return
+		end
 	end
 
 	def get_score_entry(nick)
@@ -71,6 +101,8 @@ class TriviaLeaderboard
 		end
 
 		entry[:score] += score
+
+		save_scores
 	end
 
 	def get_leaderboard
@@ -210,8 +242,6 @@ class TriviaBot < Cinch::Bot
 			repeat m
 		elsif cmd == 'stfu'
 			stop_game
-		elsif cmd == 'stats'
-			stats m
 		end
 	end
 
