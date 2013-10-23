@@ -46,6 +46,46 @@ class TriviaTaunter
 	end
 end
 
+class TriviaLeaderboard
+	def initialize(bot)
+		@bot = bot
+		@scores = []
+	end
+
+	def get_score_entry(nick)
+		entries = @scores.select {|entry| entry[:nick].downcase == nick.downcase}
+		return nil if entries.empty?
+		return entries.first
+	end
+
+	def question_answered(nick)
+		add_score nick,1
+	end
+
+	def add_score(nick,score)
+		entry = get_score_entry(nick)
+
+		unless entry	
+			entry = {:nick => nick, :score => 0}
+			@scores << entry
+		end
+
+		entry[:score] += score
+	end
+
+	def get_leaderboard
+		@scores.sort_by {|score| [-score[:score]]}
+	end
+
+	def cmd_stats(m,argstr)
+		rank = 1
+		get_leaderboard.each do |entry|
+			m.reply("%d. %s %d" % [rank,entry[:nick],entry[:score]])
+			rank+=1
+		end
+	end
+end
+
 class TriviaStreak
 	include Cinch::Helpers
 
@@ -155,25 +195,9 @@ class TriviaBot < Cinch::Bot
 		@question_time_limit = 60
 		@question_warn_times = [45,30,15]
 
-		@scores = []
-		@trivia_plugins = [TriviaHints.new(self), TriviaStreak.new(self), TriviaTaunter.new(self)]
-	end
+		@leaderboard = TriviaLeaderboard.new(self)
 
-	def get_score_entry(nick)
-		entries = @scores.select {|entry| entry[:nick].downcase == nick.downcase}
-		return nil if entries.empty?
-		return entries.first
-	end
-
-	def add_score(nick,score)
-		entry = get_score_entry(nick)
-
-		unless entry	
-			entry = {:nick => nick, :score => 0}
-			@scores << entry
-		end
-
-		entry[:score] += score
+		@trivia_plugins = [TriviaHints.new(self), TriviaStreak.new(self), TriviaTaunter.new(self),@leaderboard]
 	end
 
 	def handle_cmd(m, cmd, argstr)
@@ -203,15 +227,7 @@ class TriviaBot < Cinch::Bot
 	end
 
 	def get_leaderboard
-		@scores.sort_by {|score| [-score[:score]]}
-	end
-
-	def stats(m)
-		rank = 1
-		get_leaderboard.each do |entry|
-			m.reply("%d. %s %d" % [rank,entry[:nick],entry[:score]])
-			rank+=1
-		end
+		@leaderboard.get_leaderboard
 	end
 	
 	def repeat(m)
@@ -321,7 +337,6 @@ class TriviaBot < Cinch::Bot
 	end
 
 	def question_answered(nick,answer)
-		add_score nick, 1
 		fire_event :question_answered, nick
 
 		if @kaos
