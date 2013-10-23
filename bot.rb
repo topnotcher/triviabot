@@ -110,6 +110,7 @@ class TriviaHints
 	def start_question
 		@hint_count = 0
 		@hint_str = nil
+		@hint_str = get_answer.gsub(/[A-Za-z0-9]/, '*')
 	end
 
 	def unmask_hint
@@ -130,14 +131,17 @@ class TriviaHints
 		@bot.question[:answer].first
 	end
 
-	def timeout_warn
-		if @hint_count == 0 or not @hint_str
-			@hint_str = get_answer.gsub(/[A-Za-z0-9]/, '*')
-		else 
-			unmask_hint
-		end
+	def cmd_hint m, argstr
+		send_hint
+	end
 
+	def timeout_warn
+		unmask_hint if @hint_count > 0
 		@hint_count += 1
+		send_hint
+	end 
+
+	def send_hint
 		@bot.chanmsg "%s %d: %s" % [Format(:yellow, "Hint"), @hint_count, @hint_str]
 	end
 end
@@ -173,6 +177,9 @@ class TriviaBot < Cinch::Bot
 	end
 
 	def handle_cmd(m, cmd, argstr)
+
+		fire_event 'cmd_'+cmd, m, argstr
+
 		if cmd == 'start'
 			start_game m
 		elsif cmd == 'repeat'
