@@ -15,7 +15,7 @@ class TriviaTicker
 end
 
 class TriviaTaunter
-	def initialize(bot)
+	def initialize(bot,config)
 		@bot = bot
 		@idle = 0
 	end
@@ -53,22 +53,19 @@ class TriviaTaunter
 end
 
 class TriviaLeaderboard
-	def initialize(bot)
+	def initialize(bot,config)
 		@bot = bot
-	
+		@stats_file = config[:statsfile]
 		@scores = []
 
 		load_saved_scores
 	end
 
 	def load_saved_scores
-		# epic hard-coded dumbness
-		store_file = 'stats.yaml'
-
-		return unless File.exists? store_file
+		return unless File.exists? @stats_file
 		
 		begin 
-			@scores = YAML::load(File.open(store_file).read)
+			@scores = YAML::load(File.open(@stats_file).read)
 		# @todo log
 		rescue
 			@scores = []
@@ -76,9 +73,8 @@ class TriviaLeaderboard
 	end
 
 	def save_scores
-		stats_file = 'stats.yaml'
 		begin
-			File.open(stats_file,'w') do |file|
+			File.open(@stats_file,'w') do |file|
 				file.puts YAML::dump(@scores)
 			end
 		# @todo log
@@ -126,7 +122,7 @@ end
 class TriviaStreak
 	include Cinch::Helpers
 
-	def initialize(bot)
+	def initialize(bot,config)
 		@bot = bot
 	end
 
@@ -180,7 +176,7 @@ end
 
 class TriviaHints
 	include Cinch::Helpers
-	def initialize(bot) 
+	def initialize(bot,config)
 		@bot = bot
 	end
 
@@ -228,13 +224,30 @@ class TriviaBot < Cinch::Bot
 	attr_reader :active
 
 	def trivia_init
-		@channel = '#derp'
+		
 		@question_time_limit = 60
 		@question_warn_times = [45,30,15]
 
-		@leaderboard = TriviaLeaderboard.new(self)
+		@trivia_plugins = []
 
-		@trivia_plugins = [TriviaHints.new(self), TriviaStreak.new(self), TriviaTaunter.new(self),@leaderboard]
+		load_config
+	end
+
+	def load_config
+		@trivia_config = YAML::load(File.open('bot.yaml'))
+
+		plugins_config = @trivia_config.delete(:plugins)
+		init_plugins(plugins_config) if plugins_config
+	end
+
+	def init_plugins(config) 
+		config.each do |plugin|
+			init_plugin(plugin)
+		end
+	end
+	
+	def init_plugin(plugin_config)
+		@trivia_plugins << Object::const_get(plugin_config[:class]).new(@bot, plugin_config[:config])
 	end
 
 	def handle_cmd(m, cmd, argstr)
@@ -313,11 +326,11 @@ class TriviaBot < Cinch::Bot
 	end
 
 	def chanmsg(msg)
-		Channel(@channel).send msg
+		Channel(@trivia_config[:channel]).send msg
 	end
 
 	def chanact(msg)
-		Channel(@channel).action msg
+		Channel(@trivia_config[:channel]).action msg
 	end
 
 	def send_question
@@ -454,10 +467,10 @@ bot = TriviaBot.new do
 	trivia_init
 	
 	configure do |c|
-		c.nick = "derp"
-		c.server = "irc.consental.com"
+		c.nick = @trivia_config[:nick]
+		c.server = @trivia_config[:host]
 		c.verbose = true
-		c.channels = ["#derp"]
+		c.channels = [@trivia_config[:channel]]
 		c.plugins.plugins = [TriviaTicker]
 	end
 

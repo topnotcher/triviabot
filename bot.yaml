@@ -1,0 +1,12 @@
+---
+:nick: derp
+:channel: '#derp'
+:host: irc.consental.com
+:plugins:
+- :class: TriviaLeaderboard
+  :config:
+    :statsfile: stats.yaml
+- :class: TriviaHints
+- :class: TriviaStreak
+- :class: TriviaHints
+- :class: TriviaTaunter
