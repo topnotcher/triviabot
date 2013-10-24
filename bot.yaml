@@ -3,10 +3,9 @@
 :channel: '#derp'
 :host: irc.consental.com
 :plugins:
-- :class: TriviaLeaderboard
+- :class: Leaderboard
   :config:
     :statsfile: stats.yaml
-- :class: TriviaHints
-- :class: TriviaStreak
-- :class: TriviaHints
-- :class: TriviaTaunter
+- :class: Hints
+- :class: Streak
+- :class: Taunter
