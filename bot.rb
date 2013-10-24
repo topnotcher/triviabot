@@ -37,7 +37,12 @@ class TriviaTaunter
 	
 	def taunt
 		reset_idle
-		first = @bot.get_leaderboard.first
+
+		leaderboard = @bot.get_plugin(TriviaLeaderboard)
+
+		return unless leaderboard
+
+		first = leaderboard.get_leaderboard.first
 
 		if first
 			@bot.chanmsg "%s is in first with %d points. You should !start a game and put him in his place!" % [first[:nick],first[:score]]
@@ -256,8 +261,10 @@ class TriviaBot < Cinch::Bot
 		fire_event :start_game
 	end
 
-	def get_leaderboard
-		@leaderboard.get_leaderboard
+	def get_plugin(type)
+		@trivia_plugins.each do |plugin|
+			return plugin if plugin.class == type
+		end
 	end
 	
 	def repeat(m)
