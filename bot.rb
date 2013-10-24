@@ -20,9 +20,6 @@ class TriviaBot < Cinch::Bot
 
 	def trivia_init
 		
-		@question_time_limit = 60
-		@question_warn_times = [45,30,15]
-
 		@trivia_plugins = []
 
 		load_config
@@ -105,7 +102,7 @@ class TriviaBot < Cinch::Bot
 
 	def start_question
 		next_question
-		@question_time = @question_time_limit
+		@question_time = @trivia_config[:question_time_limit]
 		
 		fire_event :start_question
 
@@ -225,7 +222,7 @@ class TriviaBot < Cinch::Bot
 	
 		if @question_time <= 0
 			question_timeout
-		elsif @question_warn_times.include? @question_time
+		elsif @trivia_config[:question_warn_times].include? @question_time
 			chanmsg "%s %d seconds remain..." % [Format(:yellow, '***'),@question_time]
 			fire_event :timeout_warn
 		end

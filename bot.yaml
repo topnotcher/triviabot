@@ -2,6 +2,11 @@
 :nick: derp
 :channel: '#derp'
 :host: irc.consental.com
+:question_time_limit: 60
+:question_warn_times: 
+ - 45
+ - 30
+ - 15
 :plugins:
 - :class: Leaderboard
   :config:
