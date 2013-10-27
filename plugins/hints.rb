@@ -41,7 +41,7 @@ class Hints
 	end 
 
 	def send_hint
-		@bot.chanmsg "%s %d: %s" % [Format(:yellow, "Hint"), @hint_count, @hint_str]
+		@bot.chanmsg "Hint %d: %s" % [@hint_count, @hint_str]
 	end
 end
 
