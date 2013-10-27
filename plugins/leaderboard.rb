@@ -61,6 +61,7 @@ class Leaderboard
 	def cmd_stats(m,argstr)
 		rank = 1
 		get_leaderboard.each do |entry|
+			break if rank > 10
 			m.reply("%d. %s %d" % [rank,entry[:nick],entry[:score]])
 			rank+=1
 		end
