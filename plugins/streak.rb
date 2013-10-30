@@ -13,7 +13,7 @@ class Streak
 		if @nick.downcase != nick.downcase
 	
 			if @streak and @streak >= 5
-				@bot.chanmsg "%s broke %s's %d-answer streak!" % [nick, @nick, @streak]
+				@bot.chanmsg "%s ended %s's reign of terror! (%d-answer streak)" % [nick, @nick, @streak]
 			end
 
 			@nick = nick
