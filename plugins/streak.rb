@@ -34,11 +34,11 @@ class Streak
 
 			@bot.chanmsg msg % [nick]
 		elsif @streak == 5
-			@bot.chanmsg "%s is UNSTOPPABLE! (5)" % [nick]
+			@bot.chanmsg "%s is UNSTOPPABLE!" % [nick]
 		elsif @streak == 8
-			@bot.chanmsg "Uhh... is anyone else playing, or is it just %s?!? (8)" % [nick]
+			@bot.chanmsg "Uhh... is anyone else playing, or is it just %s?!?" % [nick]
 		elsif @streak == 10
-			@bot.chanmsg "%s is the TRIVIA MASTER. (10) " % [nick]
+			@bot.chanmsg "%s is the TRIVIA MASTER." % [nick]
 		elsif @streak > 10
 			@bot.chanmsg "%s's streak continues: %d answers in a row!" % [nick, @streak]
 		end
